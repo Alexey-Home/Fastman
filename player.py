@@ -96,7 +96,6 @@ class Player:
                 self.speed_gravity = 5
                 self.is_col = False
                 self.bounce_off_walls(0.1)
-            print(self.sliding_time)
         else:
             self.speed_gravity = 5
             if not self.is_jump and not self.is_col:
