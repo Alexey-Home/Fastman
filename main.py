@@ -40,7 +40,6 @@ def main():
         screen.blit(player.image, (player.x, player.y))
 
         keys = pygame.key.get_pressed()
-        #player_col = player.image.get_rect(topleft=(player.x, player.y))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -48,14 +47,17 @@ def main():
                 pygame.quit()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and player.is_col:
                 player.is_jump = True
+                player.is_col = False
             elif event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT):
                 player.is_run = True
             elif event.type == pygame.KEYUP and (event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT):
                 player.is_run = False
 
-        player.physics(object_collisions)
+
         player.run(keys)
-        player.jump()
+        player.jump(keys)
+        player.gravity(keys)
+        player.check_collision(object_collisions)
 
         if player.y > height:
             gameplay = False
