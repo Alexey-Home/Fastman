@@ -1,71 +1,67 @@
 import pygame
-from player import Player
+from player import Player, PartBody
+from exit import Exit, Button
+from editor import Level, Menu
+from data.levels import level_1, menu
 
 
 def main():
 
     width = 1024
     height = 768
-
     pygame.init()
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((width, height))
     color_bkg = (230, 234, 240)
-    player = Player()
-
-    pygame.display.flip()
-    gameplay = True
-
-    rect1 = pygame.Surface((200, 30))
-    rect1.fill("Grey")
-    rect1_col = rect1.get_rect(topleft=(0, 720))
-
-    rect2 = pygame.Surface((200, 30))
-    rect2.fill("Grey")
-    rect2_col = rect2.get_rect(topleft=(250, 720))
-
-    rect3 = pygame.Surface((200, 100))
-    rect3.fill("Grey")
-    rect3_col = rect3.get_rect(topleft=(250, 550))
+    level, l_menu, player = create_menu()
 
 
-    object_collisions = [rect1_col, rect2_col, rect3_col]
-
-
-    while gameplay:
+    while True:
         screen.fill(color_bkg)
-        screen.blit(rect1, (0, 720))
-        screen.blit(rect2, (250, 720))
-        screen.blit(rect3, (250, 550))
-        screen.blit(player.image, (player.x, player.y))
-
-        keys = pygame.key.get_pressed()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                gameplay = False
-                pygame.quit()
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and player.is_col:
-                player.is_jump = True
-                player.is_col = False
-            elif event.type == pygame.KEYDOWN and (event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT):
-                player.is_run = True
-            elif event.type == pygame.KEYUP and (event.key == pygame.K_RIGHT or event.key == pygame.K_LEFT):
-                player.is_run = False
-
-
-        player.run(keys)
-        player.jump(keys)
-        player.gravity(keys)
-        player.check_collision(object_collisions)
-
-        if player.y > height:
-            gameplay = False
+        if not player.gameplay:
+            if level.show_menu:
+                l_menu.show_menu(screen)
+                player.gameplay = l_menu.control_menu()
+            screen.blit(player.image, (player.x, player.y))
+            level.show_rect(screen)
+            player.gameplay_player(l_menu, screen, level)
+            pygame.display.flip()
+        else:
+            l_menu.first_time = False
+            level = Level(level_1)
+            level.show_menu = False
+            exit_door = Exit(level.position_exit)
+            button = Button(level.position_button)
+            player = Player("images/man1.jpg", level.start_player[0], level.start_player[1], True)
+            while True:
+                screen.fill(color_bkg)
+                if level.show_menu:
+                    l_menu.show_menu(screen)
+                    player.gameplay = l_menu.control_menu()
+                    if player.gameplay:
+                        break
+                level.show_rect(screen)
+                level.show_bombs(screen)
+                screen.blit(exit_door.image, exit_door.position)
+                screen.blit(button.image, button.position)
+                player.gameplay_player(l_menu, screen, level, button,  exit_door)
+                player.check_death(screen)
+                level.check_alive(player)
+                player.check_level_done()
+                pygame.display.flip()
+                pygame.display.update()
+                clock.tick(60)
 
         pygame.display.update()
         clock.tick(60)
 
 
+
+def create_menu():
+    level = Level(menu)
+    l_menu = Menu()
+    player = Player("images/man1.jpg", level.start_player[0], level.start_player[1], False)
+    return level, l_menu, player
 
 
 if __name__ == "__main__":
