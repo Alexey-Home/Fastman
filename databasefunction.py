@@ -2,9 +2,9 @@ import sqlite3 as sq
 import re
 
 
-def get_object(cur, title, object):
+def get_object(cur, title, obj):
     """Получает из базы данных координаты врагов, обьектов"""
-    cur.execute(f"""SELECT {object} FROM levels WHERE title = {title}""")
+    cur.execute(f"""SELECT {obj} FROM levels WHERE title = {title}""")
     result = cur.fetchone()[0]
     tmp = []
     req = "([0-9.]+)"
@@ -53,7 +53,7 @@ def get_level_from_db(title=0):
     else:
         level["title"] = 1
 
-    l_object = ["button", "bombs", "hedgehods", "start_player", "door", "gun"]
+    l_object = ["button", "bombs", "hedgehods", "start_player", "door", "gun", "add_sec", "time"]
 
     for obj in l_object:
         level[obj] = get_object(cur, title, obj)
@@ -82,7 +82,6 @@ def new_game():
         cur.execute("""UPDATE levels SET status = 0""")
         cur.execute("""UPDATE levels SET status = 1 WHERE title = 1""")
 
+
 if __name__ == "__main__":
     get_level_from_db()
-
-
